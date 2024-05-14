@@ -16,7 +16,7 @@ const cookieOptions = {
 // middleware
 app.use(
 	cors({
-		origin: ["http://localhost:5173", "study-syncer-8735c.web.app", "study-syncer-8735c.firebaseapp.com"],
+		origin: ["http://localhost:5173", "https://study-syncer.surge.sh", "study-syncer-8735c.web.app", "study-syncer-8735c.firebaseapp.com"],
 		credentials: true,
 	})
 )
