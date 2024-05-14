@@ -64,8 +64,8 @@ async function run() {
 		// Connect the client to the server	(optional starting in v4.7)
 		// await client.connect()
 
-		const assignmentCollection = client.db("assignmentDB").collection("assignment")
-		const submittedAssignmentCollection = client.db("assignmentDB").collection("submittedAssignment")
+		// const assignmentCollection = client.db("assignmentDB").collection("assignment")
+		// const submittedAssignmentCollection = client.db("assignmentDB").collection("submittedAssignment")
 
 		// auth related api
 		//creating Token
@@ -77,11 +77,11 @@ async function run() {
 			res.cookie("token", token, cookieOptions).send({ success: true })
 		})
 
-		// app.post("/logout", async (req, res) => {
-		// 	const user = req.body
-		// 	console.log("logging out", user)
-		// 	res.clearCookie("token", { maxAge: 0 }).send({ success: true })
-		// })
+		app.post("/logout", async (req, res) => {
+			const user = req.body
+			console.log("logging out", user)
+			res.clearCookie("token", { maxAge: 0 }).send({ success: true })
+		})
 
 		app.get("/assignment", logger, async (req, res) => {
 			const cursor = assignmentCollection.find()
