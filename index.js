@@ -69,19 +69,19 @@ async function run() {
 
 		// auth related api
 		//creating Token
-		// app.post("/jwt", logger, async (req, res) => {
-		// 	const user = req.body
-		// 	console.log("user for token", user)
-		// 	const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET)
-
-		// 	res.cookie("token", token, cookieOptions).send({ success: true })
-		// })
-
-		app.post("/logout", async (req, res) => {
+		app.post("/jwt", logger, async (req, res) => {
 			const user = req.body
-			console.log("logging out", user)
-			res.clearCookie("token", { maxAge: 0 }).send({ success: true })
+			console.log("user for token", user)
+			const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET)
+
+			res.cookie("token", token, cookieOptions).send({ success: true })
 		})
+
+		// app.post("/logout", async (req, res) => {
+		// 	const user = req.body
+		// 	console.log("logging out", user)
+		// 	res.clearCookie("token", { maxAge: 0 }).send({ success: true })
+		// })
 
 		app.get("/assignment", logger, async (req, res) => {
 			const cursor = assignmentCollection.find()
