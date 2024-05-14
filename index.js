@@ -64,7 +64,7 @@ async function run() {
 		// Connect the client to the server	(optional starting in v4.7)
 		// await client.connect()
 
-		// const assignmentCollection = client.db("assignmentDB").collection("assignment")
+		const assignmentCollection = client.db("assignmentDB").collection("assignment")
 		// const submittedAssignmentCollection = client.db("assignmentDB").collection("submittedAssignment")
 
 		// auth related api
