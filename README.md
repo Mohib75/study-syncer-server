@@ -1,4 +1,4 @@
-# Website Name: Voyago
+# Website Name: StudySyncer
 
 Live Link : https://study-syncer.surge.sh/
 
