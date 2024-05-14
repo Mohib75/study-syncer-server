@@ -69,13 +69,13 @@ async function run() {
 
 		// auth related api
 		//creating Token
-		app.post("/jwt", logger, async (req, res) => {
-			const user = req.body
-			console.log("user for token", user)
-			const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET)
+		// app.post("/jwt", logger, async (req, res) => {
+		// 	const user = req.body
+		// 	console.log("user for token", user)
+		// 	const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET)
 
-			res.cookie("token", token, cookieOptions).send({ success: true })
-		})
+		// 	res.cookie("token", token, cookieOptions).send({ success: true })
+		// })
 
 		app.post("/logout", async (req, res) => {
 			const user = req.body
