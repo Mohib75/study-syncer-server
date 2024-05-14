@@ -84,8 +84,13 @@ async function run() {
 		})
 
 		app.get("/assignment", logger, async (req, res) => {
+			const page = parseInt(req.query.page)
+			const size = parseInt(req.query.size)
 			const cursor = assignmentCollection.find()
-			const result = await cursor.toArray()
+			const result = await cursor
+				.skip(page * size)
+				.limit(size)
+				.toArray()
 			res.send(result)
 		})
 
@@ -94,6 +99,11 @@ async function run() {
 			const query = { _id: new ObjectId(id) }
 			const result = await assignmentCollection.findOne(query)
 			res.send(result)
+		})
+
+		app.get("/assignmentCount", async (req, res) => {
+			const count = await assignmentCollection.estimatedDocumentCount()
+			res.send({ count })
 		})
 
 		app.get("/submittedAssignment", logger, async (req, res) => {
