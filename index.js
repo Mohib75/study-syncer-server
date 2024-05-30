@@ -6,6 +6,7 @@ require("dotenv").config()
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb")
 const app = express()
 const port = process.env.PORT || 5000
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY)
 
 const cookieOptions = {
 	httpOnly: true,
@@ -43,15 +44,15 @@ const logger = (req, res, next) => {
 	next()
 }
 
-const verifyToken = (req, res, next) => {
-	const token = req?.cookies?.token
-	// console.log('token in the middleware', token);
-	// no token available
+const verifyToken = async (req, res, next) => {
+	const token = req.cookies?.token
+	console.log(token)
 	if (!token) {
 		return res.status(401).send({ message: "unauthorized access" })
 	}
 	jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
 		if (err) {
+			console.log(err)
 			return res.status(401).send({ message: "unauthorized access" })
 		}
 		req.user = decoded
@@ -65,7 +66,12 @@ async function run() {
 		// await client.connect()
 
 		const assignmentCollection = client.db("assignmentDB").collection("assignment")
+
 		const submittedAssignmentCollection = client.db("assignmentDB").collection("submittedAssignment")
+
+		const courseCollection = client.db("assignmentDB").collection("courses")
+
+		const enrolledCourseCollection = client.db("assignmentDB").collection("enrolledCourses")
 
 		// auth related api
 		//creating Token
@@ -94,6 +100,17 @@ async function run() {
 			res.send(result)
 		})
 
+		app.get("/courses", logger, async (req, res) => {
+			const page = parseInt(req.query.page)
+			const size = parseInt(req.query.size)
+			const cursor = courseCollection.find()
+			const result = await cursor
+				.skip(page * size)
+				.limit(size)
+				.toArray()
+			res.send(result)
+		})
+
 		app.get("/assignment/:id", async (req, res) => {
 			const id = req.params.id
 			const query = { _id: new ObjectId(id) }
@@ -101,8 +118,20 @@ async function run() {
 			res.send(result)
 		})
 
+		app.get("/courses/:id", async (req, res) => {
+			const id = req.params.id
+			const query = { _id: new ObjectId(id) }
+			const result = await courseCollection.findOne(query)
+			res.send(result)
+		})
+
 		app.get("/assignmentCount", async (req, res) => {
 			const count = await assignmentCollection.estimatedDocumentCount()
+			res.send({ count })
+		})
+
+		app.get("/courseCount", async (req, res) => {
+			const count = await courseCollection.estimatedDocumentCount()
 			res.send({ count })
 		})
 
@@ -125,6 +154,12 @@ async function run() {
 			res.send(result)
 		})
 
+		app.get("/myCourses/:email", async (req, res) => {
+			const cursor = enrolledCourseCollection.find({ email: req.params.email })
+			const result = await cursor.toArray()
+			res.send(result)
+		})
+
 		app.post("/assignment", async (req, res) => {
 			const newAssignment = req.body
 			const result = await assignmentCollection.insertOne(newAssignment)
@@ -135,6 +170,36 @@ async function run() {
 			const newAssignment = req.body
 			const result = await submittedAssignmentCollection.insertOne(newAssignment)
 			res.send(result)
+		})
+
+		app.post("/enrolledCourses", async (req, res) => {
+			const newCourse = req.body
+			const result = await enrolledCourseCollection.insertOne(newCourse)
+			res.send(result)
+		})
+
+		app.post("/courses", async (req, res) => {
+			const newCourse = req.body
+			const result = await courseCollection.insertOne(newCourse)
+			res.send(result)
+		})
+
+		// create-payment-intent
+		app.post("/create-payment-intent", async (req, res) => {
+			const price = req.body.price
+			const priceInCent = parseFloat(price) * 100
+			if (!price || priceInCent < 1) return
+			// generate clientSecret
+			const { client_secret } = await stripe.paymentIntents.create({
+				amount: priceInCent,
+				currency: "usd",
+				// In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
+				automatic_payment_methods: {
+					enabled: true,
+				},
+			})
+			// send client secret as response
+			res.send({ clientSecret: client_secret })
 		})
 
 		app.put("/assignment/:id", async (req, res) => {
