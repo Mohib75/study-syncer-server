@@ -155,7 +155,9 @@ async function run() {
 		})
 
 		app.get("/myCourses/:email", async (req, res) => {
-			const cursor = enrolledCourseCollection.find({ email: req.params.email })
+			const email = req.params.email
+			const query = { email: email }
+			const cursor = enrolledCourseCollection.find(query)
 			const result = await cursor.toArray()
 			res.send(result)
 		})
